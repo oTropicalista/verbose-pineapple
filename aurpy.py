@@ -1,10 +1,15 @@
 #!/usr/bin/python
-#--------------------------
-# Name: aurpy.py
-# Autor: oTropicalista
-# Github: https://github.com/oTropicalista
-# Repository: https://github.com/oTropicalista/verbose-pineapple
-# Data: 17/09/2020
+#------------------------------------------------------------------+
+# Name: aurpy.py                                                   |
+# Autor: oTropicalista                                             |
+# Github: https://github.com/oTropicalista                         |
+# Repository: https://github.com/oTropicalista/verbose-pineapple   |
+# Data: 17/09/2020                                                 |
+#------------------------------------------------------------------+
+
+#To-do
+# Tratamento de erros no instal() e no limpar_casa()
+# 
 
 import os
 import time
@@ -13,19 +18,26 @@ import argparse
 import subprocess
 from io import BytesIO
 from bs4 import BeautifulSoup
-
-SEARCH_URL1 = "https://aur.archlinux.org/packages/?O=0&SeB=nd&K="
-SEARCH_URL2 = "&outdated=&SB=n&SO=a&PP=50&do_Search=Go"
+from configparser import ConfigParser
 
 class params:
-    version = "v0.1"
-    title = """
+    cfg = ConfigParser()
+    cfg.read('config.txt')
+
+    NAME = cfg['app']['NAME']
+    VERSION = cfg['app']['VERSION']
+    DESCRIPTION = cfg['app']['DESCRIPTION']
+    AUTOR = cfg['app']['AUTOR']
+    GITHUB = cfg['app']['GITHUB']
+    SEARCH_URL1 = cfg['params']['URL1']
+    SEARCH_URL2 = cfg['params']['URL2']
+    TITLE = """
       ____ ___  ___________  __  __
      / __ `/ / / / ___/ __ \/ / / /
     / /_/ / /_/ / /  / /_/ / /_/ / 
     \__,_/\__,_/_/  / .___/\__, /  
                    /_/    /____/ {}
-    """.format(version)
+    """.format(VERSION)
 
 class color:
    PURPLE = '\033[95m'
@@ -41,19 +53,19 @@ class color:
 
 def msg(name=None):
     return """
-    + Autor: oTropicalista
-    + Github: https://github.com/oTropicalista
+    + Autor: {}
+    + Github: {}
 
     aurpy.py [options] package_name
     [-S, --install]
     [-d, --description]
-    """
+    """.format(params.AUTOR, params.GITHUB)
 
 def init():
-    print(color.BLUE + color.BOLD + params.title + color.END)
+    print(color.BLUE + color.BOLD + params.TITLE + color.END)
     
     # tratar os argumentos de entrada
-    psr = argparse.ArgumentParser(description='Ferramenta para pesquisa e instalação de pacotes do Arch User Repository', usage=msg())
+    psr = argparse.ArgumentParser(description=''.format(), usage=msg())
 
     # argumentos
     psr.add_argument('Name',
@@ -76,7 +88,7 @@ def search_pkg(pkgname):
     # pesquisar no AUR o nome passado
     print(color.BOLD + color.BLUE + "[=] Pesquisando por: " + color.END + "{}...\n".format(pkgname))
 
-    url = f"{SEARCH_URL1}{pkgname}{SEARCH_URL2}"
+    url = f"{params.SEARCH_URL1}{pkgname}{params.SEARCH_URL2}"
     html = get_html(url)
 
     #TO-D0: tratamento de erro no get da pagina
@@ -152,14 +164,35 @@ def download(pkg):
     
 
 def instal(name):
-    print(color.BLUE + color.BOLD + "[=] Iniciando a instalação do pacote..." + color.END)
-    #executar makepkg -si e pacman -U
-    print("Current", os.getcwd()) #printa diretório atual
-    i = "makepkg -si"
-    making = subprocess.check_output(i, shell=True)
+    #rodar makepkg e pacman -U
+    print(color.BLUE + color.BOLD + "[=] Diretório atual: " + + color.END + os.getcwd())
+    time.sleep(1)
+    
+    print(color.BLUE + color.BOLD + "[=] Pesquisando dependências..." + color.END)
+
+    os.system("makepkg -s")
+    time.sleep(2)
+    print(color.GREEN + color.BOLD + "[+] Dependências instaladas." + color.END)
+
+    print(color.BLUE + color.BOLD + "[=] Criando pkgbuild do pacote...." + color.END)
+    time.sleep(2)
+
+    print(color.BLUE + color.BOLD + "[=] Instalando pacote..." + color.END)
+    os.system("sudo pacman -U {}".format(name))
     
     print("\n\n" + color.GREEN + color.BOLD + "[+] Pacote instalado com sucesso!" + color.END)
+    limpar_casa(name)
     exit()
+
+def limpar_casa(name):
+    #apagar diretório criado
+    print(color.BLUE + color.BOLD + "[=] Limpando a bagunça..." + color.END)
+
+    os.chdir("../")
+    os.system("rm -rf {}".format(name))
+    
+    print(color.BLUE + color.BOLD + "[+] Tudo limpo! Não há mais o que fazer aqui." + color.END)
+    print(color.BLUE + color.BOLD + "[*] Até a próxima!" + color.END)
 
 
 if __name__ == "__main__":

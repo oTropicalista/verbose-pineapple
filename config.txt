@@ -1,0 +1,10 @@
+[app]
+NAME = aurpy
+AUTOR = oTropicalista
+GITHUB = https://github.com/oTropicalista
+DESCRIPTION = Ferramenta para pesquisa e instalação de pacotes do Arch User Repository
+VERSION = 0.2
+
+[params]
+URL1 = https://aur.archlinux.org/packages/?O=0&SeB=nd&K=
+URL2 = &outdated=&SB=n&SO=a&PP=50&do_Search=Go

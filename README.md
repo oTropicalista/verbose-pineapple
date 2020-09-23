@@ -8,10 +8,11 @@ Tool for searching and installing packages from Arch User Repository directly fr
 os
 time
 pycurl
+BytesIO
 argparse
 subprocess
-BytesIO
 BeautifulSoup
+ConfigParser
 
 ## Usage
 Search packages
