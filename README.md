@@ -1,7 +1,7 @@
 ![Python 3.6](https://img.shields.io/badge/Python-3.6-blue.svg)
 # aurpy
 
-![Image of aurpy](https://github.com/oTropicalista/verbose-pineapple/image.png)
+![aurpy in action](https://github.com/oTropicalista/verbose-pineapple/blob/master/image.png)
 
 ## DESCRIPTION
 Tool for searching and installing packages from Arch User Repository directly from the terminal.
