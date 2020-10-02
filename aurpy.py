@@ -161,11 +161,14 @@ def download(pkg):
     else:
         print(color.RED + color.BOLD + "[!] Erro: pacote não encontrado !\n" + color.END)
         exit()
-    
+
+def direct_instal():
+    # está no diretorio do pkgbuild
+    os.system("makepkg -si")
 
 def instal(name):
     #rodar makepkg e pacman -U
-    print(color.BLUE + color.BOLD + "[=] Diretório atual: " + + color.END + os.getcwd())
+    print(color.BLUE + color.BOLD + "[=] Diretório atual: " + color.END + os.getcwd())
     time.sleep(1)
     
     print(color.BLUE + color.BOLD + "[=] Pesquisando dependências..." + color.END)
