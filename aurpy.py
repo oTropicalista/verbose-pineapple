@@ -19,6 +19,9 @@ import subprocess
 from io import BytesIO
 from bs4 import BeautifulSoup
 from configparser import ConfigParser
+from rich.console import Console
+from rich.table import Table
+from rich import print
 
 class params:
     cfg = ConfigParser()
@@ -39,18 +42,6 @@ class params:
                    /_/    /____/ {}
     """.format(VERSION)
 
-class color:
-   PURPLE = '\033[95m'
-   CYAN = '\033[96m'
-   DARKCYAN = '\033[36m'
-   BLUE = '\033[94m'
-   GREEN = '\033[92m'
-   YELLOW = '\033[93m'
-   RED = '\033[91m'
-   BOLD = '\033[1m'
-   UNDERLINE = '\033[4m'
-   END = '\033[0m'
-
 def msg(name=None):
     return """
     + Autor: {}
@@ -62,7 +53,7 @@ def msg(name=None):
     """.format(params.AUTOR, params.GITHUB)
 
 def init():
-    print(color.BLUE + color.BOLD + params.TITLE + color.END)
+    print("[bold blue]{}[/bold blue]".format(params.TITLE))
     
     # tratar os argumentos de entrada
     psr = argparse.ArgumentParser(description=''.format(), usage=msg())
@@ -86,7 +77,7 @@ def init():
 
 def search_pkg(pkgname):
     # pesquisar no AUR o nome passado
-    print(color.BOLD + color.BLUE + "[=] Pesquisando por: " + color.END + "{}...\n".format(pkgname))
+    print("[bold blue][=] Pesquisando por:[/bold blue] {}...\n".format(pkgname))
 
     url = f"{params.SEARCH_URL1}{pkgname}{params.SEARCH_URL2}"
     html = get_html(url)
@@ -102,8 +93,13 @@ def search_pkg(pkgname):
 def tratar_results(table):
     # recebe todo o html da table de resultados, formata
     # e exibe para o usuário escolher
+    print("[bold blue]Resultados\n===============[/bold blue]")
+    console = Console()
+    tablee = Table(show_header=True)
+    tablee.add_column("Nome")
+    tablee.add_column("Versão")
+    tablee.add_column("Descrição")
 
-    print(color.BOLD + "Resultados\n===============" + color.END)
 
     for row in table.findAll('tr'):
         cells = row.findAll('td')
@@ -115,13 +111,16 @@ def tratar_results(table):
             d = cells[4].find(text=True) #descricao
             a = cells[5].find(text=True) #autor
             
-            list_pkgs(n, v, vv, p, d, a)
+            #list_pkgs(n, v, vv, p, d, a)
+            
+            tablee.add_row(n, v, d)
+    console.print(tablee)
 
 
 def list_pkgs(name, version, votes, popularity, description, author):
     # recebe todos os atributos dos pacotes
     # exibir resultados para escolha
-    print(color.BOLD + color.BLUE + "[+] {}".format(name) + " - v:{}".format(version) + color.END)
+    print("[bold blue][+] {}".format(name) + " - v:{}[/bold blue]".format(version))
     print(description)
 
 
@@ -141,7 +140,10 @@ def get_html(url):
 
 
 def download(pkg):
-    print(color.BOLD + color.BLUE + "[=] Pesquisando por: " + color.END + "{}...\n".format(pkg))
+    ''''
+    Get the package snapshot
+    '''
+    print("[bold blue][=] Pesquisando por: [/bold blue] {}...\n".format(pkg))
     url = "https://aur.archlinux.org/{}.git".format(pkg)
     download = subprocess.run(
         ["git", "clone", url], # clona o diretório do pacote
@@ -149,17 +151,17 @@ def download(pkg):
     )
 
     if "Cloning" in str(download.stderr, 'utf-8'):
-        print(color.BLUE + color.BOLD + "[=] Pacote encontrado !" + color.END)
+        print("[bold blue][=] Pacote encontrado ![/bold blue]")
 
         # TO-DO v1.0: mostrar dados do pacote para conferência
 
         time.sleep(2)
-        print(color.BLUE + color.BOLD + "[=] Entrando no diretório clonado..." + color.END)
+        print("[blue bold][=] Entrando no diretório clonado...[/blue bold]")
         os.chdir(pkg) # entra no diretorio clonado
         time.sleep(1)
         instal(pkg)
     else:
-        print(color.RED + color.BOLD + "[!] Erro: pacote não encontrado !\n" + color.END)
+        print("[bold red][!] Erro: pacote não encontrado ![/bold red]\n")
         exit()
 
 def direct_instal():
@@ -168,34 +170,34 @@ def direct_instal():
 
 def instal(name):
     #rodar makepkg e pacman -U
-    print(color.BLUE + color.BOLD + "[=] Diretório atual: " + color.END + os.getcwd())
+    print("[blue bold][=] Diretório atual: [/bold blue]" + os.getcwd())
     time.sleep(1)
     
-    print(color.BLUE + color.BOLD + "[=] Pesquisando dependências..." + color.END)
+    print("[blue bold][=] Pesquisando dependências...[/blue bold]")
 
     os.system("makepkg -s")
     time.sleep(2)
-    print(color.GREEN + color.BOLD + "[+] Dependências instaladas." + color.END)
+    print("[green bold][+] Dependências instaladas.[/green bold]")
 
-    print(color.BLUE + color.BOLD + "[=] Criando pkgbuild do pacote...." + color.END)
+    print("[blue bold][=] Criando pkgbuild do pacote....[/bold blue]")
     time.sleep(2)
 
-    print(color.BLUE + color.BOLD + "[=] Instalando pacote..." + color.END)
+    print("[blue bold][=] Instalando pacote...[/blue bold]")
     os.system("sudo pacman -U {}".format(name))
     
-    print("\n\n" + color.GREEN + color.BOLD + "[+] Pacote instalado com sucesso!" + color.END)
+    print("\n\n[bold green][+] Pacote instalado com sucesso![bold green]")
     limpar_casa(name)
     exit()
 
 def limpar_casa(name):
     #apagar diretório criado
-    print(color.BLUE + color.BOLD + "[=] Limpando a bagunça..." + color.END)
+    print("[bold blue][=] Limpando a bagunça...[/bold blue]")
 
     os.chdir("../")
     os.system("rm -rf {}".format(name))
     
     print(color.BLUE + color.BOLD + "[+] Tudo limpo! Não há mais o que fazer aqui." + color.END)
-    print(color.BLUE + color.BOLD + "[*] Até a próxima!" + color.END)
+    print("[blue bold][*] Até a próxima![/bold blue]")
 
 
 if __name__ == "__main__":

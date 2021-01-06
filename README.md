@@ -7,13 +7,13 @@
 Tool for searching and installing packages from Arch User Repository directly from the terminal.
 
 ## REQUIREMENTS
-os
-time
-pycurl
-BytesIO
-argparse
-subprocess
-BeautifulSoup
+os\
+time\
+pycurl\
+BytesIO\
+argparse\
+subprocess\
+BeautifulSoup\
 ConfigParser
 
 ## Usage
